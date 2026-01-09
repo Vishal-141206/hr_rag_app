@@ -3,7 +3,7 @@ fastapi==0.110.0
 uvicorn==0.29.0
 python-multipart==0.0.9
 python-dotenv==1.0.1
-
+numpy==1.26.4
 # Document parsing
 pypdf==4.2.0
 python-docx==1.1.2
@@ -19,3 +19,5 @@ faiss-cpu==1.8.0
 
 # Tokenizer
 tiktoken==0.7.0
+sentence-transformers
+

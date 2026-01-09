@@ -7,8 +7,12 @@ load_dotenv()
 
 VECTOR_PATH = "vector_store"
 
+from langchain_community.embeddings import HuggingFaceEmbeddings
+
 def get_embeddings():
-    return OpenAIEmbeddings()
+    return HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
 
 def get_llm():
     return ChatOpenAI(model="gpt-4o-mini", temperature=0)

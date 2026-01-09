@@ -1,15 +1,13 @@
 import os
-from dotenv import load_dotenv
-from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
-
-# Load env even if imported independently
-load_dotenv()
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 VECTOR_PATH = "vector_store"
 
 def get_embeddings():
-    return OpenAIEmbeddings()
+    return HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
 
 def save_to_faiss(chunks, metadatas, path=VECTOR_PATH):
     os.makedirs(path, exist_ok=True)
