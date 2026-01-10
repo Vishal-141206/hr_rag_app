@@ -1,39 +1,102 @@
 # AI-Powered HR Onboarding Assistant
 
-## Overview
-This project implements a Retrieval-Augmented Generation (RAG) system that allows HR teams
-to upload internal policy documents and enables employees to query them using natural language.
-The assistant provides accurate, document-grounded answers with clear citations.
+## 1. Background
 
-## Features
-- Upload HR documents (PDF, DOCX, TXT)
-- Semantic search using FAISS vector database
-- Context-aware answers with zero hallucination
-- Automatic query categorization (Benefits, Legal, Culture)
-- Source citations for transparency
-- Admin dashboard to view and delete documents
-- Clean and intuitive frontend interface
+HR teams spend significant time answering repetitive questions from new hires related to company policies, benefits, and administrative procedures.  
+To scale the onboarding process, this project implements a **Self-Service Knowledge Assistant** that allows employees to query internal HR documents using natural language.
 
-## Architecture
-1. Document ingestion and text extraction
-2. Intelligent chunking using recursive character splitting
-3. Vector embedding using SentenceTransformers
-4. FAISS similarity search for retrieval
-5. Extractive answer generation with sentence ranking
+---
 
-## Tech Stack
-- Backend: FastAPI
-- Frontend: React + Vite
-- Vector DB: FAISS
-- Embeddings: all-MiniLM-L6-v2 (HuggingFace)
-- Language: Python, JavaScript
+## 2. Problem Statement
 
-## Setup Instructions
+Build a **Retrieval-Augmented Generation (RAG)** application that:
+- Allows HR admins to upload policy documents
+- Enables employees to ask questions in natural language
+- Provides accurate, context-aware answers
+- Avoids hallucinations
+- Includes clear citations from source documents
 
-### Backend
+---
+
+## 3. Features
+
+### Employee Features
+- Ask natural language questions about HR policies
+- Receive accurate answers strictly based on uploaded documents
+- View source document citations
+- Automatic query categorization (Benefits, Legal, Internal Culture, General)
+
+### Admin Features
+- Upload HR policy documents (PDF, DOCX, TXT)
+- View all uploaded documents
+- Delete documents from the knowledge base
+
+---
+
+## 4. System Architecture
+
+The system follows a modular **Retrieval-Augmented Generation (RAG)** pipeline:
+
+1. **Document Ingestion**
+   - Supports PDF, DOCX, and TXT files
+   - Extracts raw text
+   - Applies intelligent chunking with overlap
+
+2. **Embedding & Vector Storage**
+   - Uses HuggingFace SentenceTransformers (`all-MiniLM-L6-v2`)
+   - Stores embeddings in FAISS for efficient similarity search
+
+3. **Retrieval**
+   - Performs semantic similarity search over document chunks
+   - Ranks content based on relevance to the user query
+
+4. **Answer Generation**
+   - Uses extractive, sentence-level answering
+   - Answers are strictly derived from retrieved document content
+   - No hallucinations by design
+
+5. **API Layer**
+   - FastAPI backend handling uploads, queries, and admin actions
+
+6. **Frontend**
+   - React + Vite interface for employees and admins
+
+---
+
+## 5. Tech Stack
+
+- **Backend:** FastAPI (Python)
+- **Frontend:** React + Vite
+- **Vector Database:** FAISS
+- **Embeddings:** HuggingFace SentenceTransformers
+- **Languages:** Python, JavaScript
+
+---
+
+## 6. Setup Instructions
+
+### Prerequisites
+- Python **3.10+**
+- Node.js **v18+**
+- npm
+- Git
+
+---
+
+### Backend Setup
+
 ```bash
 cd backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python -m uvicorn main:app --reload
+
+---
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
