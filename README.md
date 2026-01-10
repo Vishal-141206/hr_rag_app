@@ -92,6 +92,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 python -m uvicorn main:app --reload
 
+```
 ---
 
 ### Frontend Setup
@@ -100,3 +101,4 @@ python -m uvicorn main:app --reload
 cd frontend
 npm install
 npm run dev
+```
