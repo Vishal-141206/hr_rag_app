@@ -1,21 +1,17 @@
 import os
-from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+import numpy as np
 from langchain_community.vectorstores import FAISS
-
-load_dotenv()
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 VECTOR_PATH = "vector_store"
-
-from langchain_community.embeddings import HuggingFaceEmbeddings
 
 def get_embeddings():
     return HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
-def get_llm():
-    return ChatOpenAI(model="gpt-4o-mini", temperature=0)
+def cosine_sim(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def ask_question(question: str):
     index_path = os.path.join(VECTOR_PATH, "index.faiss")
@@ -24,46 +20,48 @@ def ask_question(question: str):
         return "No HR documents have been uploaded yet.", []
 
     embeddings = get_embeddings()
+
     db = FAISS.load_local(
         VECTOR_PATH,
         embeddings,
         allow_dangerous_deserialization=True
     )
 
-    docs = db.similarity_search(question, k=3)
+    docs = db.similarity_search(question, k=4)
 
     if not docs:
         return "I don't know based on the provided documents.", []
 
-    context_blocks = []
+    # ---- Sentence-level ranking ----
+    sentences = []
     sources = set()
 
     for d in docs:
-        src = d.metadata.get("source", "Unknown")
+        src = d.metadata.get("source", "Unknown document")
         sources.add(src)
-        context_blocks.append(f"[Source: {src}]\n{d.page_content}")
+        for s in d.page_content.split("."):
+            s = s.strip()
+            if len(s) > 20:
+                sentences.append((s, src))
 
-    context = "\n\n".join(context_blocks)
+    if not sentences:
+        return "I don't know based on the provided documents.", list(sources)
 
-    prompt = f"""
-You are an HR onboarding assistant.
+    q_emb = embeddings.embed_query(question)
 
-Rules:
-- Use ONLY the context below.
-- Do NOT use prior knowledge.
-- If answer is missing, say:
-  "I don't know based on the provided documents."
+    scored = []
+    for sent, src in sentences:
+        s_emb = embeddings.embed_query(sent)
+        score = cosine_sim(q_emb, s_emb)
+        scored.append((score, sent, src))
 
-Context:
-{context}
+    scored.sort(reverse=True, key=lambda x: x[0])
 
-Question:
-{question}
+    # Take top 3 best sentences
+    best_sentences = [s for _, s, _ in scored[:3]]
 
-Answer:
-"""
+    answer = ". ".join(best_sentences)
+    if not answer.endswith("."):
+        answer += "."
 
-    llm = get_llm()
-    response = llm.invoke(prompt)
-
-    return response.content.strip(), list(sources)
+    return answer, list(sources)
