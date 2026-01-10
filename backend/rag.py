@@ -13,6 +13,20 @@ def get_embeddings():
 def cosine_sim(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
+def categorize_query(question: str) -> str:
+    q = question.lower()
+
+    if any(k in q for k in ["leave", "vacation", "salary", "insurance", "benefit"]):
+        return "Benefits"
+
+    if any(k in q for k in ["policy", "compliance", "legal", "conduct"]):
+        return "Legal"
+
+    if any(k in q for k in ["remote", "work from home", "coffee", "culture"]):
+        return "Internal Culture"
+
+    return "General"
+
 def ask_question(question: str):
     index_path = os.path.join(VECTOR_PATH, "index.faiss")
 
@@ -64,4 +78,8 @@ def ask_question(question: str):
     if not answer.endswith("."):
         answer += "."
 
-    return answer, list(sources)
+    category = categorize_query(question)
+    return answer, list(sources), category
+
+
+

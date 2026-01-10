@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
+from fastapi import APIRouter
 
 # Load environment variables
 load_dotenv()
@@ -67,10 +68,32 @@ class Question(BaseModel):
 
 @app.post("/ask")
 def ask(q: Question):
-    answer, sources = ask_question(q.question)
+    answer, sources, category = ask_question(q.question)
 
     return {
-        "question": q.question,
         "answer": answer,
-        "sources": sources
+        "sources": sources,
+        "category": category
     }
+
+
+UPLOAD_DIR = "uploads"
+
+@app.get("/admin/documents")
+def list_documents():
+    if not os.path.exists(UPLOAD_DIR):
+        return []
+
+    return os.listdir(UPLOAD_DIR)
+
+@app.delete("/admin/documents/{filename}")
+def delete_document(filename: str):
+    file_path = os.path.join("uploads", filename)
+
+    if not os.path.exists(file_path):
+        return {"error": "File not found"}
+
+    os.remove(file_path)
+
+    # Optional: rebuild FAISS later (documented in README)
+    return {"status": "deleted", "file": filename}
